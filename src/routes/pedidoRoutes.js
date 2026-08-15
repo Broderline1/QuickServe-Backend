@@ -54,4 +54,20 @@ router.get('/resumen', verificarToken, async (req, res) => {
   res.json(resumen);
 });
 
+// GET pedidos por mesa
+router.get('/mesa/:mesa_id', async (req, res) => {
+  const hoy    = new Date(); hoy.setHours(0,0,0,0);
+  const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
+
+  const pedidos = await Pedido.findAll({
+    where: {
+      mesa_id: req.params.mesa_id,
+      creado_en: { [Op.between]: [hoy, manana] }
+    },
+    include: [{ model: Mesa, attributes: ['numero'] }],
+    order: [['creado_en', 'ASC']]
+  });
+  res.json(pedidos);
+});
+
 module.exports = router;
